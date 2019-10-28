@@ -1,11 +1,14 @@
 package ru.smak.graphics.windows
 
+import ru.smak.graphics.convertation.CartesianScreenPlane
+import ru.smak.graphics.painters.FractalPainter
+import ru.smak.graphics.windows.components.MainPanel
 import java.awt.Color
 import java.awt.Dimension
 import javax.swing.*
 
 class Window : JFrame(){
-    private val mainPanel: JPanel
+    private val mainPanel: MainPanel
     private val controlPanel: JPanel
     private val btnExit: JButton
     private val cbColor: JCheckBox
@@ -13,13 +16,26 @@ class Window : JFrame(){
 
     private val dim: Dimension
 
+    private val painter: FractalPainter
+
     init{
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         dim = Dimension(500, 500)
         minimumSize = dim
 
-        mainPanel = JPanel()
-        mainPanel.background = Color.WHITE
+        val plane = CartesianScreenPlane(
+            -1,
+            -1,
+            -2.0,
+            2.0,
+            -2.0,
+            2.0
+        )
+
+        painter = FractalPainter(plane)
+
+        mainPanel = MainPanel(painter)
+        //mainPanel.background = Color.WHITE
         controlPanel = JPanel()
         controlPanel.border =
             BorderFactory.createTitledBorder(
@@ -106,6 +122,8 @@ class Window : JFrame(){
         )
 
         pack()
+        painter.plane.realWidth = mainPanel.width
+        painter.plane.realHeight = mainPanel.height
         isVisible = true
     }
 }
