@@ -16,6 +16,6 @@ class Mandelbrot() {
                 return i
             }
         }
-        return -1
+        return 0
     }
 }

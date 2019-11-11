@@ -3,6 +3,7 @@ package ru.smak.graphics.windows
 import ru.smak.graphics.convertation.CartesianScreenPlane
 import ru.smak.graphics.painters.FractalPainter
 import ru.smak.graphics.windows.components.MainPanel
+import ru.smak.math.fractals.Mandelbrot
 import java.awt.Color
 import java.awt.Dimension
 import javax.swing.*
@@ -27,12 +28,13 @@ class Window : JFrame(){
             -1,
             -1,
             -2.0,
-            2.0,
-            -2.0,
-            2.0
+            1.0,
+            -1.0,
+            1.0
         )
 
-        painter = FractalPainter(plane)
+        val m = Mandelbrot()
+        painter = FractalPainter(plane, m)
 
         mainPanel = MainPanel(painter)
         //mainPanel.background = Color.WHITE
