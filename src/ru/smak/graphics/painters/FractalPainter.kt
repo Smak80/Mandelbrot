@@ -5,11 +5,17 @@ import ru.smak.graphics.convertation.Converter
 import ru.smak.math.fractals.Mandelbrot
 import java.awt.Color
 import java.awt.Graphics
+import kotlin.math.abs
 
 class FractalPainter(var plane: CartesianScreenPlane,
                      val fractal: Mandelbrot
                      )
 {
+    private var cs: (Float) -> Color
+
+    init {
+        cs = { if (abs(it) < 1e-10) Color.BLACK else Color.WHITE }
+    }
 
     fun paint(g: Graphics){
         g.clearRect(
@@ -25,11 +31,14 @@ class FractalPainter(var plane: CartesianScreenPlane,
                     Converter.xScr2Crt(i, plane)
                 val y =
                     Converter.yScr2Crt(j, plane)
-                if (fractal.isInSet(x, y)==0){
-                    g.fillRect(i, j, 1, 1)
-                }
+                g.color = cs(fractal.isInSet(x, y))
+                g.fillRect(i, j, 1, 1)
             }
         }
+    }
+
+    fun setColorScheme(cs: (Float) -> Color) {
+        this.cs = cs
     }
 
 }

@@ -7,6 +7,10 @@ import ru.smak.math.fractals.Mandelbrot
 import java.awt.Color
 import java.awt.Dimension
 import javax.swing.*
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.log10
+import kotlin.math.sin
 
 class Window : JFrame(){
     private val mainPanel: MainPanel
@@ -18,6 +22,30 @@ class Window : JFrame(){
     private val dim: Dimension
 
     private val painter: FractalPainter
+    private val cs0: (Float) -> Color = {
+        if (abs(it) < 1e-10) Color.BLACK else Color.WHITE
+    }
+    private val cs1: (Float) -> Color = {
+        Color.getHSBColor(
+            abs(cos(100 * it)),
+            (log10(abs(sin(10 * it)))),
+            abs(sin(100 * it))
+        )
+    }
+    private val cs2: (Float) -> Color = {
+        Color.getHSBColor(
+            abs(cos(5 * it)),
+            (log10(abs(sin(10 * it)))),
+            abs(sin(10 * it)).toFloat()
+        )
+    }
+    private val cs3: (Float) -> Color = {
+        Color(
+            abs(cos(50 * it) * sin(8 * it)),
+            (abs(sin(243 * it) + cos(100 * it)) / 4.0F),
+            abs(sin(10 * it))
+        )
+    }
 
     init{
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
@@ -37,7 +65,6 @@ class Window : JFrame(){
         painter = FractalPainter(plane, m)
 
         mainPanel = MainPanel(painter)
-        //mainPanel.background = Color.WHITE
         controlPanel = JPanel()
         controlPanel.border =
             BorderFactory.createTitledBorder(
@@ -47,6 +74,13 @@ class Window : JFrame(){
         cbColor = JCheckBox("Цвет", false)
         cbProp = JCheckBox("Соблюдение пропорций",
                     false)
+
+        setColorScheme()
+        cbColor.addActionListener {
+            setColorScheme()
+            mainPanel.repaint()
+        }
+
         val gl = GroupLayout(contentPane)
         layout = gl
         gl.setVerticalGroup(
@@ -127,5 +161,10 @@ class Window : JFrame(){
         painter.plane.realWidth = mainPanel.width
         painter.plane.realHeight = mainPanel.height
         isVisible = true
+    }
+
+    private fun setColorScheme() {
+        val cs = if (cbColor.isSelected) cs1 else cs0
+        painter.setColorScheme(cs)
     }
 }
