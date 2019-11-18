@@ -71,6 +71,9 @@ class Window : JFrame(){
                 "Управление отображением"
             )
         btnExit = JButton("Выход")
+        btnExit.addActionListener {
+            System.exit(0)
+        }
         cbColor = JCheckBox("Цвет", false)
         cbProp = JCheckBox("Соблюдение пропорций",
                     false)
@@ -164,7 +167,7 @@ class Window : JFrame(){
     }
 
     private fun setColorScheme() {
-        val cs = if (cbColor.isSelected) cs1 else cs0
+        val cs = if (cbColor.isSelected) cs2 else cs0
         painter.setColorScheme(cs)
     }
 }
