@@ -3,7 +3,7 @@ package ru.smak.math.fractals
 import ru.smak.math.Complex
 
 class Mandelbrot() {
-    var maxIter = 200
+    var maxIter = 500
     val R = 2.0
     fun isInSet(x: Double, y: Double): Float {
         val c = Complex(x, y)

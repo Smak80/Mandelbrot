@@ -39,11 +39,13 @@ class Window : JFrame(){
             abs(sin(10 * it)).toFloat()
         )
     }
-    private val cs3: (Float) -> Color = {
+    private val cs3: (Float) -> Color = { value ->
+        if (value >= 1) Color.BLACK
+        if (value < 0) Color.WHITE
         Color(
-            abs(cos(50 * it) * sin(8 * it)),
-            (abs(sin(243 * it) + cos(100 * it)) / 4.0F),
-            abs(sin(10 * it))
+            Math.abs(Math.sin(Math.PI / 8 + 12 * value)).toFloat(),
+            Math.abs(Math.cos(Math.PI / 6 - 12 * value)).toFloat(),
+            Math.abs(Math.cos(Math.PI / 2 + 12 * value)).toFloat()
         )
     }
 
@@ -167,7 +169,7 @@ class Window : JFrame(){
     }
 
     private fun setColorScheme() {
-        val cs = if (cbColor.isSelected) cs2 else cs0
+        val cs = if (cbColor.isSelected) cs3 else cs0
         painter.setColorScheme(cs)
     }
 }
