@@ -6,13 +6,28 @@ import ru.smak.graphics.painters.SelectionRectPainter
 import java.awt.Graphics
 import java.awt.event.*
 import javax.swing.JPanel
+import javax.swing.SwingWorker
 
 class MainPanel (var painter: FractalPainter): JPanel(){
     val srp = SelectionRectPainter()
+
+    inner class BackgroundProcess : SwingWorker<Unit, Unit>() {
+        override fun doInBackground() {
+            painter.create()
+        }
+
+        override fun done() {
+            painter.paint(this@MainPanel.graphics)
+        }
+    }
+
+    private var bgProcess = BackgroundProcess()
+
     init{
         addComponentListener(
             object: ComponentAdapter(){
             override fun componentResized(e: ComponentEvent?) {
+                painter.created = false
                 repaint()
             }
         })
@@ -29,6 +44,7 @@ class MainPanel (var painter: FractalPainter): JPanel(){
                     painter.plane.xMax = x2
                     painter.plane.yMax = y1
                     painter.plane.yMin = y2
+                    painter.created = false
                     repaint()
                 }
             }
@@ -55,6 +71,11 @@ class MainPanel (var painter: FractalPainter): JPanel(){
         painter.plane.realWidth = width
         painter.plane.realHeight = height
         super.paint(g)
-        if (g!=null) painter.paint(g)
+        g?.let { painter.paint(it) }
+        if (!painter.created) {
+            if (!bgProcess.isDone) bgProcess.cancel(true)
+            bgProcess = BackgroundProcess()
+            bgProcess.execute()
+        }
     }
 }

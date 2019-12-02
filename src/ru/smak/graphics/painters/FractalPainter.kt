@@ -14,25 +14,31 @@ class FractalPainter(var plane: CartesianScreenPlane,
                      )
 {
     private var cs: (Float) -> Color
-    private var buf: BufferedImage? = null
-    private var notReady = -1
+    private var readyBuf: BufferedImage? = null
+    private val threads: MutableList<Thread> = mutableListOf()
+    var created = false
 
     init {
         cs = { if (abs(it) < 1e-10) Color.BLACK else Color.WHITE }
 
-        plane.addResizeListener { old, new ->
+        /*plane.addResizeListener { old, new ->
             if (old != new && plane.realWidth > 0 && plane.realHeight > 0) {
-                buf = BufferedImage(plane.realWidth, plane.realHeight, BufferedImage.TYPE_INT_RGB)
+                created = false
             }
-        }
+        }*/
 
         if (plane.realWidth > 0 && plane.realHeight > 0)
-            buf = BufferedImage(plane.realWidth, plane.realHeight, BufferedImage.TYPE_INT_RGB)
+            readyBuf = BufferedImage(plane.realWidth, plane.realHeight, BufferedImage.TYPE_INT_RGB)
 
     }
 
     fun paint(gr: Graphics) {
-        val g = buf?.graphics ?: gr
+        gr.drawImage(readyBuf, 0, 0, plane.realWidth, plane.realHeight, null)
+    }
+
+    fun create() {
+        val buf = BufferedImage(plane.realWidth, plane.realHeight, BufferedImage.TYPE_INT_RGB)
+        val g = buf.graphics
         g.clearRect(
             0,
             0,
@@ -40,26 +46,16 @@ class FractalPainter(var plane: CartesianScreenPlane,
             plane.realHeight
         )
         g.color = Color.BLACK
-        /*for (i in 0..plane.width){
-            for (j in 0..plane.height){
-                val x =
-                    Converter.xScr2Crt(i, plane)
-                val y =
-                    Converter.yScr2Crt(j, plane)
-                g.color = cs(fractal.isInSet(x, y))
-                g.fillRect(i, j, 1, 1)
+        for (th in threads) {
+            if (th.isAlive) try {
+                th.interrupt()
+            } catch (e: InterruptedException) {
             }
-        }*/
+        }
+        threads.clear()
 
-        // Java-style
-        //val p = P(g)
-        //Thread(p).start()
-
-        //Kotlin-style
-
-        val threads: MutableList<Thread> = mutableListOf()
         val maxThreads = 4
-        notReady = maxThreads
+
         for (k in 0 until maxThreads) {
             val kWidth = plane.width / maxThreads
             threads.add(k, thread {
@@ -78,25 +74,27 @@ class FractalPainter(var plane: CartesianScreenPlane,
                         }
                     }
                 }
-                notReady--
             })
         }
         for (t in threads) {
             t.join()
         }
-        gr.drawImage(buf, 0, 0, null)
+        created = true
+        readyBuf = buf
     }
 
     fun setColorScheme(cs: (Float) -> Color) {
+        created = false
         this.cs = cs
     }
 
 }
 
 //Java-style
+/*
 class P(var g: Graphics) : Runnable {
     override fun run() {
         g.color = Color.BLUE
         g.fillRect(10, 10, 300, 300)
     }
-}
+}*/
